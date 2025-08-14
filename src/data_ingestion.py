@@ -101,7 +101,7 @@ class FinancialDataIngestion:
         """
         Fetch financial news using Alpha Vantage for better reliability on deployed apps.
         """
-        if not self.alpha_vantage_api_key:
+        if not self.ALPHA_VANTAGE_API_KEY:
             logger.warning("Alpha Vantage API key not found. Please set ALPHA_VANTAGE_API_KEY in your secrets.")
             return []
 
@@ -114,7 +114,7 @@ class FinancialDataIngestion:
                    f"function=NEWS_SENTIMENT&"
                    f"{ticker_query}&"
                    f"limit=100&"
-                   f"apikey={self.alpha_vantage_api_key}") # Yahan 'alpha_vantage_api_key' variable use ho raha hai
+                   f"apikey={self.ALPHA_VANTAGE_API_KEY}")
 
             response = requests.get(url)
             data = response.json()
