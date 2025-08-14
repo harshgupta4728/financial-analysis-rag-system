@@ -21,7 +21,7 @@ class FinancialDataIngestion:
     """Handles ingestion of financial data from multiple sources"""
     
     def __init__(self):
-        self.news_api_key = os.getenv('NEWS_API_KEY')
+        self.ALPHA_VANTAGE_API_KEY = os.getenv('ALPHA_VANTAGE_API_KEY')
     
     def extract_text_from_pdf(self, pdf_path: str) -> str:
         """
@@ -99,64 +99,46 @@ class FinancialDataIngestion:
     
     def get_financial_news(self, ticker: str = None, days_back: int = 30) -> List[Dict[str, Any]]:
         """
-        Fetch financial news articles using NewsAPI for reliability.
-        
-        Args:
-            ticker: Optional stock ticker to filter news.
-            days_back: Number of days to look back for news.
-            
-        Returns:
-            List of news articles with metadata.
+        Fetch financial news using Alpha Vantage for better reliability on deployed apps.
         """
-        if not self.news_api_key:
-            logger.warning("News API key not found. Please set NEWS_API_KEY in your environment.")
+        if not self.alpha_vantage_api_key:
+            logger.warning("Alpha Vantage API key not found. Please set ALPHA_VANTAGE_API_KEY in your secrets.")
             return []
 
         news_articles = []
-        
         try:
-            # Calculate the 'from' date for the API query
-            from_date = (datetime.now() - timedelta(days=days_back)).strftime('%Y-%m-%d')
-
-            # Construct the API URL
-            # We search for the ticker in top business headlines in the US
-            if ticker:
-                query = f"q={ticker}&"
-            else:
-                query = "category=business&" # General business news if no ticker
-                
-            url = (f"https://newsapi.org/v2/top-headlines?"
-                   f"{query}"
-                   f"from={from_date}&"
-                   "sortBy=popularity&"
-                   "language=en&"
-                   f"apiKey={self.news_api_key}")
+            # Sahi URL aur parameters Alpha Vantage ke liye
+            ticker_query = f"tickers={ticker}" if ticker else "topics=financial-markets"
+            
+            url = (f"https://www.alphavantage.co/query?"
+                   f"function=NEWS_SENTIMENT&"
+                   f"{ticker_query}&"
+                   f"limit=100&"
+                   f"apikey={self.alpha_vantage_api_key}") # Yahan 'alpha_vantage_api_key' variable use ho raha hai
 
             response = requests.get(url)
-            
-            if response.status_code != 200:
-                logger.error(f"Failed to fetch news from NewsAPI. Status code: {response.status_code}")
-                return []
-                
             data = response.json()
-            
-            for entry in data.get("articles", []):
-                # Format the article to match the expected structure
+
+            if "feed" not in data:
+                logger.error(f"Failed to fetch news from Alpha Vantage. Response: {data}")
+                return []
+
+            for entry in data.get("feed", []):
                 article = {
                     'title': entry.get('title', ''),
-                    'summary': entry.get('description', ''),
+                    'summary': entry.get('summary', ''),
                     'link': entry.get('url', ''),
-                    'published_date': entry.get('publishedAt', ''),
-                    'source': entry.get('source', {}).get('name', 'Unknown'),
-                    'full_text': entry.get('content', entry.get('description', '')) # Fallback to description
+                    'published_date': entry.get('time_published', ''),
+                    'source': entry.get('source', 'Unknown'),
+                    'full_text': entry.get('summary', '')
                 }
                 news_articles.append(article)
             
-            logger.info(f"Successfully fetched {len(news_articles)} news articles from NewsAPI")
+            logger.info(f"Successfully fetched {len(news_articles)} news articles from Alpha Vantage")
             return news_articles
             
         except Exception as e:
-            logger.error(f"Error fetching financial news: {str(e)}")
+            logger.error(f"Error fetching financial news from Alpha Vantage: {str(e)}")
             return []
     
     def get_company_financials(self, ticker: str) -> Dict[str, Any]:

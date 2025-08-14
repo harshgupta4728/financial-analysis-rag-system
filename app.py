@@ -590,8 +590,8 @@ def main():
             gemini_key = os.getenv('GEMINI_API_KEY')
             st.write(f"Gemini API Key: {'✅ Configured' if gemini_key else '❌ Not configured'}")
 
-            news_api_key = os.getenv('NEWS_API_KEY')
-            st.write(f"News API Key: {'✅ Configured' if news_api_key else '❌ Not configured'}")
+            ALPHA_VANTAGE_API_KEY = os.getenv('ALPHA_VANTAGE_API_KEY')
+            st.write(f"News API Key: {'✅ Configured' if ALPHA_VANTAGE_API_KEY else '❌ Not configured'}")
 
             # Model information
             st.markdown("**Model Configuration**")

@@ -96,7 +96,7 @@ Financial Analysis RAG System
     GEMINI_API_KEY=your_gemini_api_key_here
 
     # Optional
-    NEWS_API_KEY=your_news_api_key_here
+    ALPHA_VANTAGE_API_KEY=your_ALPHA_VANTAGE_API_KEY_here
 
     # Application Configuration
     CHUNK_SIZE=1000
@@ -205,7 +205,7 @@ Create a `.env` file in the project root:
 GEMINI_API_KEY=your_gemini_api_key_here
 
 # Optional
-NEWS_API_KEY=your_news_api_key_here
+ALPHA_VANTAGE_API_KEY=your_ALPHA_VANTAGE_API_KEY_here
 
 # Application Configuration
 CHUNK_SIZE=1000
