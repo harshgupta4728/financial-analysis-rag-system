@@ -8,7 +8,6 @@ import re
 import yfinance as yf
 import pandas as pd
 import requests
-import feedparser
 from datetime import datetime, timedelta
 from typing import List, Dict, Any, Optional
 import PyPDF2
@@ -100,68 +99,60 @@ class FinancialDataIngestion:
     
     def get_financial_news(self, ticker: str = None, days_back: int = 30) -> List[Dict[str, Any]]:
         """
-        Fetch financial news articles
+        Fetch financial news articles using NewsAPI for reliability.
         
         Args:
-            ticker: Optional stock ticker to filter news
-            days_back: Number of days to look back for news
+            ticker: Optional stock ticker to filter news.
+            days_back: Number of days to look back for news.
             
         Returns:
-            List of news articles with metadata
+            List of news articles with metadata.
         """
+        if not self.news_api_key:
+            logger.warning("News API key not found. Please set NEWS_API_KEY in your environment.")
+            return []
+
         news_articles = []
         
         try:
-            # RSS feeds for financial news
-            rss_feeds = [
-                "https://feeds.reuters.com/reuters/businessNews",
-                "https://feeds.bloomberg.com/markets/news.rss",
-                "https://feeds.finance.yahoo.com/rss/2.0/headline"
-            ]
+            # Calculate the 'from' date for the API query
+            from_date = (datetime.now() - timedelta(days=days_back)).strftime('%Y-%m-%d')
+
+            # Construct the API URL
+            # We search for the ticker in top business headlines in the US
+            if ticker:
+                query = f"q={ticker}&"
+            else:
+                query = "category=business&" # General business news if no ticker
+                
+            url = (f"https://newsapi.org/v2/top-headlines?"
+                   f"{query}"
+                   f"from={from_date}&"
+                   "sortBy=popularity&"
+                   "language=en&"
+                   f"apiKey={self.news_api_key}")
+
+            response = requests.get(url)
             
-            for feed_url in rss_feeds:
-                try:
-                    feed = feedparser.parse(feed_url)
-                    
-                    for entry in feed.entries:
-                        # Check if article is within the specified time range
-                        pub_date = datetime(*entry.published_parsed[:6])
-                        if pub_date < datetime.now() - timedelta(days=days_back):
-                            continue
-                        
-                        # Filter by ticker if specified
-                        if ticker and ticker.lower() not in entry.title.lower():
-                            continue
-                        
-                        article = {
-                            'title': entry.title,
-                            'summary': entry.summary,
-                            'link': entry.link,
-                            'published_date': pub_date.isoformat(),
-                            'source': feed.feed.title if hasattr(feed.feed, 'title') else 'Unknown'
-                        }
-                        
-                        # Extract full text if possible
-                        try:
-                            response = requests.get(entry.link, timeout=10)
-                            if response.status_code == 200:
-                                soup = BeautifulSoup(response.content, 'html.parser')
-                                # Remove script and style elements
-                                for script in soup(["script", "style"]):
-                                    script.decompose()
-                                article['full_text'] = soup.get_text()
-                            else:
-                                article['full_text'] = entry.summary
-                        except:
-                            article['full_text'] = entry.summary
-                        
-                        news_articles.append(article)
-                        
-                except Exception as e:
-                    logger.warning(f"Error parsing RSS feed {feed_url}: {str(e)}")
-                    continue
+            if response.status_code != 200:
+                logger.error(f"Failed to fetch news from NewsAPI. Status code: {response.status_code}")
+                return []
+                
+            data = response.json()
             
-            logger.info(f"Successfully fetched {len(news_articles)} news articles")
+            for entry in data.get("articles", []):
+                # Format the article to match the expected structure
+                article = {
+                    'title': entry.get('title', ''),
+                    'summary': entry.get('description', ''),
+                    'link': entry.get('url', ''),
+                    'published_date': entry.get('publishedAt', ''),
+                    'source': entry.get('source', {}).get('name', 'Unknown'),
+                    'full_text': entry.get('content', entry.get('description', '')) # Fallback to description
+                }
+                news_articles.append(article)
+            
+            logger.info(f"Successfully fetched {len(news_articles)} news articles from NewsAPI")
             return news_articles
             
         except Exception as e:
