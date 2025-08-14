@@ -48,7 +48,7 @@ Financial Analysis RAG System
 ├── 📥 Data Ingestion Layer
 │   ├── PDF Processing (PyPDF2)
 │   ├── Market Data (yfinance)
-│   └── News Aggregation (RSS feeds)
+│   └── News Aggregation (NewsAPI.org)
 ├── 🔧 Processing Layer
 │   ├── Text Chunking & Cleaning
 │   ├── Embedding Generation (Sentence Transformers)
@@ -235,7 +235,7 @@ You can modify these in the respective module files.
 
 ### Financial News
 
-  - **Sources**: Reuters, Bloomberg, Yahoo Finance RSS feeds
+  - **Sources**: Reuters, Bloomberg, Yahoo Finance 
   - **Coverage**: Global financial news
   - **Update Frequency**: Real-time
 

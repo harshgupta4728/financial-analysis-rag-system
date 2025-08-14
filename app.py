@@ -94,7 +94,8 @@ def initialize_components():
 
 def main():
     """Main application function"""
-
+    st.write("Checking for News API Key...")
+    st.write(f"News API Key Found: {'Yes' if os.getenv('NEWS_API_KEY') else 'No'}")
     # Header
     st.markdown('<h1 class="main-header">📊 Financial Analysis RAG System</h1>', unsafe_allow_html=True)
     st.markdown("### AI-Powered Financial Analysis with Multi-Source Data Integration")
