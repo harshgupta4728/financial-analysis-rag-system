@@ -16,6 +16,7 @@ from datetime import datetime, timedelta
 import pandas as pd
 import plotly.graph_objects as go
 from dotenv import load_dotenv
+import time
 
 
 # Set environment variables to disable telemetry
