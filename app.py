@@ -332,22 +332,54 @@ def main():
         #                     st.error(f"Failed to fetch data for {ticker}")
         with col2:
             st.subheader("📈 Market Data")
-            ticker = st.text_input("Stock Ticker Symbol", placeholder="e.g., AAPL, MSFT")
+
+            # Stock ticker input
+            ticker = st.text_input(
+                "Stock Ticker Symbol",
+                placeholder="e.g., AAPL, MSFT, GOOGL",
+                help="Enter a valid stock ticker symbol"
+            )
+
             if ticker:
-                period = st.selectbox("Data Period", ["1mo", "3mo", "6mo", "1y", "2y"], index=3)
+                period = st.selectbox(
+                    "Data Period",
+                    ["1mo", "3mo", "6mo", "1y", "2y", "5y"],
+                    index=3
+                )
+
                 if st.button("Fetch Market Data"):
                     with st.spinner(f"Fetching data for {ticker}..."):
-                        market_data = data_ingestion.get_market_data(ticker, period)
-                        if market_data and 'historical_data' in market_data:
-                            market_text = f"Market Data for {ticker}: Current Price: ${market_data.get('current_price', 'N/A')}"
-                            doc_id = f"market_{ticker}_{int(time.time())}"
-                            chunks = text_processor.chunk_text(market_text, "market", doc_id)
-                            if vector_store.add_documents(chunks, "market"):
-                                st.success(f"✅ Stored market data for {ticker}")
+                        try:
+                            # Fetch market data
+                            market_data = data_ingestion.get_market_data(ticker, period)
+
+                            if market_data and 'historical_data' in market_data and not market_data['historical_data'].empty:
+                                # Prepare text for storage
+                                market_text = f"Market Data for {ticker}: Current Price: ${market_data.get('current_price', 'N/A')}"
+                                doc_id = f"market_{ticker}_{int(time.time())}"
+                                chunks = text_processor.chunk_text(market_text, "market", doc_id)
+
+                                # Store the data
+                                if vector_store.add_documents(chunks, "market"):
+                                    st.success(f"✅ Successfully fetched and stored market data for {ticker}")
+
+                                    # --- THIS IS THE FIX: Display the fetched data ---
+                                    st.markdown("---")
+                                    st.write(f"**Data for {market_data.get('info', {}).get('longName', ticker)}**")
+                                    
+                                    price = market_data.get('current_price', 0)
+                                    market_cap = market_data.get('market_cap', 0)
+                                    pe_ratio = market_data.get('pe_ratio', 0)
+
+                                    st.metric("Current Price", f"${price:,.2f}" if price else "N/A")
+                                    st.metric("Market Cap", f"${market_cap:,.0f}" if market_cap else "N/A")
+                                    st.metric("P/E Ratio", f"{pe_ratio:.2f}" if pe_ratio else "N/A")
+                                else:
+                                    st.error("Failed to store market data")
                             else:
-                                st.error("Failed to store market data.")
-                        else:
-                            st.error(f"Failed to fetch data for {ticker}")
+                                st.error(f"Failed to fetch valid data for {ticker}. The ticker might be invalid or the data source is unavailable.")
+                        except Exception as e:
+                            st.error(f"An error occurred: {str(e)}")
 
         # st.subheader("📰 Financial News")
         # news_ticker = st.text_input("News Ticker Filter (Optional)", placeholder="e.g., TSLA")
