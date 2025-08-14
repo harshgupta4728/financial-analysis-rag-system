@@ -1,3 +1,8 @@
+# PATCH: For Streamlit Cloud compatibility with ChromaDB
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+# END PATCH
 """
 Financial Analysis RAG System - Main Application
 Streamlit web interface for financial analysis with RAG capabilities
