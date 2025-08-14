@@ -1,28 +1,22 @@
-# PATCH: For Streamlit Cloud compatibility with ChromaDB
-__import__('pysqlite3')
-import sys
-sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
-# END PATCH
-
-"""
-Financial Analysis RAG System - Main Application
-Streamlit web interface for financial analysis with RAG capabilities
-"""
-
-import os
 import streamlit as st
-from datetime import datetime, timedelta
-import pandas as pd
-import plotly.graph_objects as go
-from dotenv import load_dotenv
 
-# Page configuration MUST be the first Streamlit command
 st.set_page_config(
     page_title="Financial Analysis RAG System",
     page_icon="📊",
     layout="wide",
     initial_sidebar_state="expanded"
 )
+
+__import__('pysqlite3')
+import sys
+sys.modules['sqlite3'] = sys.modules.pop('pysqlite3')
+
+import os
+from datetime import datetime, timedelta
+import pandas as pd
+import plotly.graph_objects as go
+from dotenv import load_dotenv
+
 
 # Set environment variables to disable telemetry
 os.environ["ANONYMIZED_TELEMETRY"] = "False"
