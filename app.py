@@ -330,26 +330,56 @@ def main():
                         else:
                             st.error(f"Failed to fetch data for {ticker}")
 
+        # st.subheader("📰 Financial News")
+        # news_ticker = st.text_input("News Ticker Filter (Optional)", placeholder="e.g., TSLA")
+        # if st.button("Fetch News"):
+        #     with st.spinner("Fetching news..."):
+        #         news_articles = data_ingestion.get_financial_news(news_ticker or "TOP_STORIES", 7)
+        #         if news_articles:
+
+        #             news_chunks = []
+        #             # CORRECTLY GENERATE UNIQUE IDs FOR EACH ARTICLE'S CHUNKS
+        #             for i, article in enumerate(news_articles):
+        #                 article_text = f"Title: {article.get('title', '')}. Summary: {article.get('summary', '')}"
+        #                 unique_article_id = f"news_{news_ticker or 'general'}_{i}"
+        #                 chunks = text_processor.chunk_text(article_text, "news", unique_article_id)
+        #                 news_chunks.extend(chunks)
+                    
+        #             if vector_store.add_documents(news_chunks, "news"):
+        #                 st.success(f"✅ Stored {len(news_chunks)} news chunks for {len(news_articles)} articles.")
+        #             else:
+        #                 st.error("Failed to store news articles")
+        #         else:
+        #             st.warning("No news articles found.")
         st.subheader("📰 Financial News")
         news_ticker = st.text_input("News Ticker Filter (Optional)", placeholder="e.g., TSLA")
         if st.button("Fetch News"):
             with st.spinner("Fetching news..."):
-                news_articles = data_ingestion.get_financial_news(news_ticker or "TOP_STORIES", 7)
+                query_ticker = news_ticker if news_ticker else "financial-markets"
+                news_articles = data_ingestion.get_financial_news(query_ticker, 7)
+                
                 if news_articles:
+                    # --- THE FIX IS HERE ---
+                    # Directly print the raw JSON data fetched from the API
+                    st.success(f"✅ Fetched {len(news_articles)} articles from the API. Displaying raw data below:")
+                    
+                    with st.expander("Show Raw API Response", expanded=True):
+                        st.json(news_articles)
+
+                    # Now, we also try to store it
                     news_chunks = []
-                    # CORRECTLY GENERATE UNIQUE IDs FOR EACH ARTICLE'S CHUNKS
+                    current_timestamp = int(time.time())
                     for i, article in enumerate(news_articles):
                         article_text = f"Title: {article.get('title', '')}. Summary: {article.get('summary', '')}"
-                        unique_article_id = f"news_{news_ticker or 'general'}_{i}"
+                        unique_article_id = f"news_{query_ticker}_{current_timestamp}_{i}"
                         chunks = text_processor.chunk_text(article_text, "news", unique_article_id)
                         news_chunks.extend(chunks)
                     
-                    if vector_store.add_documents(news_chunks, "news"):
-                        st.success(f"✅ Stored {len(news_chunks)} news chunks for {len(news_articles)} articles.")
-                    else:
-                        st.error("Failed to store news articles")
+                    if not vector_store.add_documents(news_chunks, "news"):
+                        st.error("Failed to store the fetched articles in the database.")
+
                 else:
-                    st.warning("No news articles found.")
+                    st.warning("No news articles were returned from the API for the given ticker.")
 
     # Tab 2: Query & Analysis
     with tab2:
