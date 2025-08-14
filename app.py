@@ -318,6 +318,13 @@ def main():
                             chunks = text_processor.chunk_text(market_text, "market", f"market_{ticker}")
                             if vector_store.add_documents(chunks, "market"):
                                 st.success(f"✅ Stored market data for {ticker}")
+                                with st.expander("Show Fetched News Articles"):
+                                    for article in news_articles[:5]: # Show first 5
+                                        st.markdown(f"**{article.get('title', 'No Title')}**")
+                                        st.markdown(f"*{article.get('source', 'Unknown Source')}*")
+                                        st.write(article.get('summary', 'No summary available.'))
+                                        st.markdown("---")
+                            
                             else:
                                 st.error("Failed to store market data.")
                         else:
