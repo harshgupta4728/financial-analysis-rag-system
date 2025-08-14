@@ -1,4 +1,5 @@
 # 📊 Financial Analysis RAG System
+[![Streamlit App](https://static.streamlit.io/badges/streamlit_badge_black_white.svg)](https://financial-analysis-rag-system.streamlit.app/)
 
 A comprehensive **Retrieval-Augmented Generation (RAG)** system for financial analysis that integrates financial reports, real-time market data, and financial news to provide AI-powered investment insights and risk assessments.
 
@@ -369,3 +370,4 @@ For questions, issues, or contributions:
 -----
 
 **Built with ❤️ for the financial analysis community**
+
