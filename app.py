@@ -306,6 +306,30 @@ def main():
                         else:
                             st.error("Failed to extract text from PDF.")
 
+        # with col2:
+        #     st.subheader("📈 Market Data")
+        #     ticker = st.text_input("Stock Ticker Symbol", placeholder="e.g., AAPL, MSFT")
+        #     if ticker:
+        #         period = st.selectbox("Data Period", ["1mo", "3mo", "6mo", "1y", "2y"], index=3)
+        #         if st.button("Fetch Market Data"):
+        #             with st.spinner(f"Fetching data for {ticker}..."):
+        #                 market_data = data_ingestion.get_market_data(ticker, period)
+        #                 if market_data and 'historical_data' in market_data:
+        #                     market_text = f"Market Data for {ticker}: Current Price: ${market_data.get('current_price', 'N/A')}, Market Cap: ${market_data.get('market_cap', 0):,.0f}"
+        #                     chunks = text_processor.chunk_text(market_text, "market", f"market_{ticker}")
+        #                     if vector_store.add_documents(chunks, "market"):
+        #                         st.success(f"✅ Stored market data for {ticker}")
+        #                         with st.expander("Show Fetched News Articles"):
+        #                             for article in news_articles[:5]: # Show first 5
+        #                                 st.markdown(f"**{article.get('title', 'No Title')}**")
+        #                                 st.markdown(f"*{article.get('source', 'Unknown Source')}*")
+        #                                 st.write(article.get('summary', 'No summary available.'))
+        #                                 st.markdown("---")
+                            
+        #                     else:
+        #                         st.error("Failed to store market data.")
+        #                 else:
+        #                     st.error(f"Failed to fetch data for {ticker}")
         with col2:
             st.subheader("📈 Market Data")
             ticker = st.text_input("Stock Ticker Symbol", placeholder="e.g., AAPL, MSFT")
@@ -315,17 +339,11 @@ def main():
                     with st.spinner(f"Fetching data for {ticker}..."):
                         market_data = data_ingestion.get_market_data(ticker, period)
                         if market_data and 'historical_data' in market_data:
-                            market_text = f"Market Data for {ticker}: Current Price: ${market_data.get('current_price', 'N/A')}, Market Cap: ${market_data.get('market_cap', 0):,.0f}"
-                            chunks = text_processor.chunk_text(market_text, "market", f"market_{ticker}")
+                            market_text = f"Market Data for {ticker}: Current Price: ${market_data.get('current_price', 'N/A')}"
+                            doc_id = f"market_{ticker}_{int(time.time())}"
+                            chunks = text_processor.chunk_text(market_text, "market", doc_id)
                             if vector_store.add_documents(chunks, "market"):
                                 st.success(f"✅ Stored market data for {ticker}")
-                                with st.expander("Show Fetched News Articles"):
-                                    for article in news_articles[:5]: # Show first 5
-                                        st.markdown(f"**{article.get('title', 'No Title')}**")
-                                        st.markdown(f"*{article.get('source', 'Unknown Source')}*")
-                                        st.write(article.get('summary', 'No summary available.'))
-                                        st.markdown("---")
-                            
                             else:
                                 st.error("Failed to store market data.")
                         else:
