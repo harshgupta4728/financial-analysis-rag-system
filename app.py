@@ -351,6 +351,35 @@ def main():
         #                 st.error("Failed to store news articles")
         #         else:
         #             st.warning("No news articles found.")
+        # st.subheader("📰 Financial News")
+        # news_ticker = st.text_input("News Ticker Filter (Optional)", placeholder="e.g., TSLA")
+        # if st.button("Fetch News"):
+        #     with st.spinner("Fetching news..."):
+        #         query_ticker = news_ticker if news_ticker else "financial-markets"
+        #         news_articles = data_ingestion.get_financial_news(query_ticker, 7)
+                
+        #         if news_articles:
+        #             # --- THE FIX IS HERE ---
+        #             # Directly print the raw JSON data fetched from the API
+        #             st.success(f"✅ Fetched {len(news_articles)} articles from the API. Displaying raw data below:")
+                    
+        #             with st.expander("Show Raw API Response", expanded=True):
+        #                 st.json(news_articles)
+
+        #             # Now, we also try to store it
+        #             news_chunks = []
+        #             current_timestamp = int(time.time())
+        #             for i, article in enumerate(news_articles):
+        #                 article_text = f"Title: {article.get('title', '')}. Summary: {article.get('summary', '')}"
+        #                 unique_article_id = f"news_{query_ticker}_{current_timestamp}_{i}"
+        #                 chunks = text_processor.chunk_text(article_text, "news", unique_article_id)
+        #                 news_chunks.extend(chunks)
+                    
+        #             if not vector_store.add_documents(news_chunks, "news"):
+        #                 st.error("Failed to store the fetched articles in the database.")
+
+        #         else:
+        #             st.warning("No news articles were returned from the API for the given ticker.")
         st.subheader("📰 Financial News")
         news_ticker = st.text_input("News Ticker Filter (Optional)", placeholder="e.g., TSLA")
         if st.button("Fetch News"):
@@ -359,14 +388,7 @@ def main():
                 news_articles = data_ingestion.get_financial_news(query_ticker, 7)
                 
                 if news_articles:
-                    # --- THE FIX IS HERE ---
-                    # Directly print the raw JSON data fetched from the API
-                    st.success(f"✅ Fetched {len(news_articles)} articles from the API. Displaying raw data below:")
-                    
-                    with st.expander("Show Raw API Response", expanded=True):
-                        st.json(news_articles)
-
-                    # Now, we also try to store it
+                    # Store the articles in the background
                     news_chunks = []
                     current_timestamp = int(time.time())
                     for i, article in enumerate(news_articles):
@@ -375,8 +397,24 @@ def main():
                         chunks = text_processor.chunk_text(article_text, "news", unique_article_id)
                         news_chunks.extend(chunks)
                     
-                    if not vector_store.add_documents(news_chunks, "news"):
-                        st.error("Failed to store the fetched articles in the database.")
+                    vector_store.add_documents(news_chunks, "news")
+                    st.success(f"✅ Fetched and stored {len(news_articles)} news articles.")
+
+                    # --- THE FIX IS HERE ---
+                    # Display the top 5 articles in a clean format
+                    st.markdown("---")
+                    st.subheader("Top 5 Fetched News Articles")
+                    
+                    for article in news_articles[:5]:
+                        title = article.get('title', 'No Title')
+                        source = article.get('source', 'Unknown Source')
+                        summary = article.get('summary', 'No summary available.')
+                        link = article.get('link', '#')
+
+                        st.markdown(f"#### [{title}]({link})")
+                        st.markdown(f"**Source:** {source}")
+                        st.write(summary)
+                        st.markdown("---")
 
                 else:
                     st.warning("No news articles were returned from the API for the given ticker.")
