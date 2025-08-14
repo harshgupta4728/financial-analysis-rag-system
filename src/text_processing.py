@@ -96,27 +96,81 @@ class FinancialTextProcessor:
 
         return sections
 
-    def chunk_text(self, text: str, chunk_type: str = "general") -> List[Dict[str, Any]]:
-        """
-        Create chunks from text based on type
+    # def chunk_text(self, text: str, chunk_type: str = "general") -> List[Dict[str, Any]]:
+    #     """
+    #     Create chunks from text based on type
 
-        Args:
-            text: Text to chunk
-            chunk_type: Type of text ("financial_report", "news", "market_data")
+    #     Args:
+    #         text: Text to chunk
+    #         chunk_type: Type of text ("financial_report", "news", "market_data")
 
-        Returns:
-            List of chunks with metadata
+    #     Returns:
+    #         List of chunks with metadata
+    #     """
+    #     chunks = []
+
+    #     if chunk_type == "financial_report":
+    #         chunks = self._chunk_financial_report(text)
+    #     elif chunk_type == "news":
+    #         chunks = self._chunk_news_article(text)
+    #     elif chunk_type == "market_data":
+    #         chunks = self._chunk_market_data(text)
+    #     else:
+    #         chunks = self._chunk_general_text(text)
+
+    #     return chunks
+    def chunk_text(self, text: str, chunk_type: str, doc_id_prefix: str) -> List[Dict[str, Any]]:
         """
+        Create chunks from text with a unique document prefix for IDs.
+        """
+        sentences = sent_tokenize(text)
         chunks = []
+        current_chunk = ""
+        chunk_id = 0
 
-        if chunk_type == "financial_report":
-            chunks = self._chunk_financial_report(text)
-        elif chunk_type == "news":
-            chunks = self._chunk_news_article(text)
-        elif chunk_type == "market_data":
-            chunks = self._chunk_market_data(text)
-        else:
-            chunks = self._chunk_general_text(text)
+        for sentence in sentences:
+            if len(current_chunk) + len(sentence) > self.chunk_size:
+                if current_chunk:
+                    chunks.append({
+                        'id': f"{doc_id_prefix}_{chunk_id}",
+                        'content': current_chunk.strip(),
+                        'type': chunk_type,
+                        'metadata': {
+                            'chunk_size': len(current_chunk),
+                            'timestamp': datetime.now().isoformat()
+                        }
+                    })
+                    chunk_id += 1
+                    # Apply overlap
+                    overlap_sentences = sent_tokenize(current_chunk)[-3:]
+                    current_chunk = " ".join(overlap_sentences) + " " + sentence
+                else:
+                    # Sentence itself is longer than chunk size
+                    chunks.append({
+                        'id': f"{doc_id_prefix}_{chunk_id}",
+                        'content': sentence[:self.chunk_size],
+                        'type': chunk_type,
+                        'metadata': {
+                            'chunk_size': len(sentence[:self.chunk_size]),
+                            'timestamp': datetime.now().isoformat()
+                        }
+                    })
+                    chunk_id += 1
+                    current_chunk = ""
+            else:
+                current_chunk += " " + sentence if current_chunk else sentence
+        
+        # Add the last remaining chunk
+        if current_chunk.strip():
+            chunks.append({
+                'id': f"{doc_id_prefix}_{chunk_id}",
+                'content': current_chunk.strip(),
+                'type': chunk_type,
+                'metadata': {
+                    'chunk_size': len(current_chunk),
+                    'timestamp': datetime.now().isoformat()
+                }
+            })
 
         return chunks
 

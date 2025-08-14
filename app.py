@@ -144,6 +144,143 @@ def main():
     ])
 
     # Tab 1: Data Ingestion
+    # with tab1:
+    #     st.header("📥 Data Ingestion")
+    #     st.markdown("Upload financial reports and fetch market data to build your knowledge base.")
+
+    #     col1, col2 = st.columns(2)
+
+    #     with col1:
+    #         st.subheader("📄 Financial Reports")
+
+    #         # PDF upload
+    #         uploaded_file = st.file_uploader(
+    #             "Upload Financial Report (PDF)", 
+    #             type=['pdf'],
+    #             help="Upload SEC filings, annual reports, or other financial documents"
+    #         )
+
+    #         if uploaded_file is not None:
+    #             if st.button("Process PDF"):
+    #                 with st.spinner("Processing PDF..."):
+    #                     try:
+    #                         # Extract text from PDF
+    #                         text = data_ingestion.process_uploaded_pdf(uploaded_file)
+
+    #                         if text:
+    #                             # Process and chunk text
+    #                             chunks = text_processor.chunk_text(text, "financial_report")
+
+    #                             # Add to vector store
+    #                             if vector_store.add_documents(chunks, "reports"):
+    #                                 st.success(f"✅ Successfully processed and stored {len(chunks)} document chunks")
+
+    #                                 # Show sample chunks
+    #                                 with st.expander("View Sample Chunks"):
+    #                                     for i, chunk in enumerate(chunks[:3]):
+    #                                         st.write(f"**Chunk {i+1}:**")
+    #                                         st.write(chunk['content'][:300] + "...")
+    #                                         st.divider()
+    #                             else:
+    #                                 st.error("Failed to store documents in vector database")
+    #                         else:
+    #                             st.error("Failed to extract text from PDF")
+    #                     except Exception as e:
+    #                         st.error(f"Error processing PDF: {str(e)}")
+
+    #     with col2:
+    #         st.subheader("📈 Market Data")
+
+    #         # Stock ticker input
+    #         ticker = st.text_input(
+    #             "Stock Ticker Symbol",
+    #             placeholder="e.g., AAPL, MSFT, GOOGL",
+    #             help="Enter a valid stock ticker symbol"
+    #         )
+
+    #         if ticker:
+    #             period = st.selectbox(
+    #                 "Data Period",
+    #                 ["1mo", "3mo", "6mo", "1y", "2y", "5y"],
+    #                 index=3
+    #             )
+
+    #             if st.button("Fetch Market Data"):
+    #                 with st.spinner(f"Fetching data for {ticker}..."):
+    #                     try:
+    #                         # Fetch market data
+    #                         market_data = data_ingestion.get_market_data(ticker, period)
+
+    #                         if market_data and 'historical_data' in market_data:
+    #                             # Convert to text for storage
+    #                             market_text = f"""
+    #                             Market Data for {ticker}:
+    #                             Current Price: ${market_data.get('current_price', 'N/A')}
+    #                             Market Cap: ${market_data.get('market_cap', 'N/A'):,.0f}
+    #                             P/E Ratio: {market_data.get('pe_ratio', 'N/A')}
+    #                             Beta: {market_data.get('beta', 'N/A')}
+
+    #                             Historical Performance:
+    #                             {market_data['historical_data'].tail(10).to_string()}
+    #                             """
+
+    #                             # Process and store
+    #                             chunks = text_processor.chunk_text(market_text, "market_data")
+
+    #                             if vector_store.add_documents(chunks, "market"):
+    #                                 st.success(f"✅ Successfully stored market data for {ticker}")
+
+    #                                 # Show market summary
+    #                                 st.metric("Current Price", f"${market_data.get('current_price', 0):.2f}")
+    #                                 st.metric("Market Cap", f"${market_data.get('market_cap', 0):,.0f}")
+    #                                 st.metric("P/E Ratio", f"{market_data.get('pe_ratio', 0):.2f}")
+    #                             else:
+    #                                 st.error("Failed to store market data")
+    #                         else:
+    #                             st.error(f"Failed to fetch data for {ticker}")
+    #                     except Exception as e:
+    #                         st.error(f"Error fetching market data: {str(e)}")
+
+    #         # News fetching
+    #         st.subheader("📰 Financial News")
+
+    #         news_ticker = st.text_input(
+    #             "News Ticker Filter (Optional)",
+    #             placeholder="e.g., AAPL",
+    #             help="Filter news by specific ticker"
+    #         )
+
+    #         days_back = st.slider("Days Back", 1, 30, 7)
+
+    #         if st.button("Fetch News"):
+    #             with st.spinner("Fetching financial news..."):
+    #                 try:
+    #                     news_articles = data_ingestion.get_financial_news(news_ticker, days_back)
+
+    #                     if news_articles:
+    #                         # Process and store news
+    #                         news_chunks = []
+    #                         for article in news_articles:
+    #                             article_text = f"Title: {article.get('title', '')}\nSummary: {article.get('summary', '')}\nFull Text: {article.get('full_text', '')}"
+    #                             chunks = text_processor.chunk_text(article_text, "news")
+    #                             news_chunks.extend(chunks)
+
+    #                         if vector_store.add_documents(news_chunks, "news"):
+    #                             st.success(f"✅ Successfully stored {len(news_articles)} news articles")
+
+    #                             # Show recent news
+    #                             with st.expander("Recent News"):
+    #                                 for article in news_articles[:5]:
+    #                                     st.write(f"**{article.get('title', 'No title')}**")
+    #                                     st.write(f"*{article.get('source', 'Unknown source')} - {article.get('published_date', 'Unknown date')}*")
+    #                                     st.write(article.get('summary', 'No summary')[:200] + "...")
+    #                                     st.divider()
+    #                         else:
+    #                             st.error("Failed to store news articles")
+    #                     else:
+    #                         st.warning("No news articles found")
+    #                 except Exception as e:
+    #                     st.error(f"Error fetching news: {str(e)}")
     with tab1:
         st.header("📥 Data Ingestion")
         st.markdown("Upload financial reports and fetch market data to build your knowledge base.")
@@ -152,135 +289,60 @@ def main():
 
         with col1:
             st.subheader("📄 Financial Reports")
-
-            # PDF upload
-            uploaded_file = st.file_uploader(
-                "Upload Financial Report (PDF)", 
-                type=['pdf'],
-                help="Upload SEC filings, annual reports, or other financial documents"
-            )
-
-            if uploaded_file is not None:
+            uploaded_file = st.file_uploader("Upload Financial Report (PDF)", type=['pdf'])
+            if uploaded_file:
                 if st.button("Process PDF"):
                     with st.spinner("Processing PDF..."):
-                        try:
-                            # Extract text from PDF
-                            text = data_ingestion.process_uploaded_pdf(uploaded_file)
-
-                            if text:
-                                # Process and chunk text
-                                chunks = text_processor.chunk_text(text, "financial_report")
-
-                                # Add to vector store
-                                if vector_store.add_documents(chunks, "reports"):
-                                    st.success(f"✅ Successfully processed and stored {len(chunks)} document chunks")
-
-                                    # Show sample chunks
-                                    with st.expander("View Sample Chunks"):
-                                        for i, chunk in enumerate(chunks[:3]):
-                                            st.write(f"**Chunk {i+1}:**")
-                                            st.write(chunk['content'][:300] + "...")
-                                            st.divider()
-                                else:
-                                    st.error("Failed to store documents in vector database")
+                        text = data_ingestion.process_uploaded_pdf(uploaded_file)
+                        if text:
+                            # Use filename for unique ID
+                            doc_id = f"pdf_{uploaded_file.name}"
+                            chunks = text_processor.chunk_text(text, "reports", doc_id)
+                            if vector_store.add_documents(chunks, "reports"):
+                                st.success(f"✅ Stored {len(chunks)} chunks from {uploaded_file.name}")
                             else:
-                                st.error("Failed to extract text from PDF")
-                        except Exception as e:
-                            st.error(f"Error processing PDF: {str(e)}")
+                                st.error("Failed to store PDF chunks.")
+                        else:
+                            st.error("Failed to extract text from PDF.")
 
         with col2:
             st.subheader("📈 Market Data")
-
-            # Stock ticker input
-            ticker = st.text_input(
-                "Stock Ticker Symbol",
-                placeholder="e.g., AAPL, MSFT, GOOGL",
-                help="Enter a valid stock ticker symbol"
-            )
-
+            ticker = st.text_input("Stock Ticker Symbol", placeholder="e.g., AAPL, MSFT")
             if ticker:
-                period = st.selectbox(
-                    "Data Period",
-                    ["1mo", "3mo", "6mo", "1y", "2y", "5y"],
-                    index=3
-                )
-
+                period = st.selectbox("Data Period", ["1mo", "3mo", "6mo", "1y", "2y"], index=3)
                 if st.button("Fetch Market Data"):
                     with st.spinner(f"Fetching data for {ticker}..."):
-                        try:
-                            # Fetch market data
-                            market_data = data_ingestion.get_market_data(ticker, period)
-
-                            if market_data and 'historical_data' in market_data:
-                                # Convert to text for storage
-                                market_text = f"""
-                                Market Data for {ticker}:
-                                Current Price: ${market_data.get('current_price', 'N/A')}
-                                Market Cap: ${market_data.get('market_cap', 'N/A'):,.0f}
-                                P/E Ratio: {market_data.get('pe_ratio', 'N/A')}
-                                Beta: {market_data.get('beta', 'N/A')}
-
-                                Historical Performance:
-                                {market_data['historical_data'].tail(10).to_string()}
-                                """
-
-                                # Process and store
-                                chunks = text_processor.chunk_text(market_text, "market_data")
-
-                                if vector_store.add_documents(chunks, "market"):
-                                    st.success(f"✅ Successfully stored market data for {ticker}")
-
-                                    # Show market summary
-                                    st.metric("Current Price", f"${market_data.get('current_price', 0):.2f}")
-                                    st.metric("Market Cap", f"${market_data.get('market_cap', 0):,.0f}")
-                                    st.metric("P/E Ratio", f"{market_data.get('pe_ratio', 0):.2f}")
-                                else:
-                                    st.error("Failed to store market data")
+                        market_data = data_ingestion.get_market_data(ticker, period)
+                        if market_data and 'historical_data' in market_data:
+                            market_text = f"Market Data for {ticker}: Current Price: ${market_data.get('current_price', 'N/A')}, Market Cap: ${market_data.get('market_cap', 0):,.0f}"
+                            chunks = text_processor.chunk_text(market_text, "market", f"market_{ticker}")
+                            if vector_store.add_documents(chunks, "market"):
+                                st.success(f"✅ Stored market data for {ticker}")
                             else:
-                                st.error(f"Failed to fetch data for {ticker}")
-                        except Exception as e:
-                            st.error(f"Error fetching market data: {str(e)}")
-
-            # News fetching
-            st.subheader("📰 Financial News")
-
-            news_ticker = st.text_input(
-                "News Ticker Filter (Optional)",
-                placeholder="e.g., AAPL",
-                help="Filter news by specific ticker"
-            )
-
-            days_back = st.slider("Days Back", 1, 30, 7)
-
-            if st.button("Fetch News"):
-                with st.spinner("Fetching financial news..."):
-                    try:
-                        news_articles = data_ingestion.get_financial_news(news_ticker, days_back)
-
-                        if news_articles:
-                            # Process and store news
-                            news_chunks = []
-                            for article in news_articles:
-                                article_text = f"Title: {article.get('title', '')}\nSummary: {article.get('summary', '')}\nFull Text: {article.get('full_text', '')}"
-                                chunks = text_processor.chunk_text(article_text, "news")
-                                news_chunks.extend(chunks)
-
-                            if vector_store.add_documents(news_chunks, "news"):
-                                st.success(f"✅ Successfully stored {len(news_articles)} news articles")
-
-                                # Show recent news
-                                with st.expander("Recent News"):
-                                    for article in news_articles[:5]:
-                                        st.write(f"**{article.get('title', 'No title')}**")
-                                        st.write(f"*{article.get('source', 'Unknown source')} - {article.get('published_date', 'Unknown date')}*")
-                                        st.write(article.get('summary', 'No summary')[:200] + "...")
-                                        st.divider()
-                            else:
-                                st.error("Failed to store news articles")
+                                st.error("Failed to store market data.")
                         else:
-                            st.warning("No news articles found")
-                    except Exception as e:
-                        st.error(f"Error fetching news: {str(e)}")
+                            st.error(f"Failed to fetch data for {ticker}")
+
+        st.subheader("📰 Financial News")
+        news_ticker = st.text_input("News Ticker Filter (Optional)", placeholder="e.g., TSLA")
+        if st.button("Fetch News"):
+            with st.spinner("Fetching news..."):
+                news_articles = data_ingestion.get_financial_news(news_ticker or "TOP_STORIES", 7)
+                if news_articles:
+                    news_chunks = []
+                    # CORRECTLY GENERATE UNIQUE IDs FOR EACH ARTICLE'S CHUNKS
+                    for i, article in enumerate(news_articles):
+                        article_text = f"Title: {article.get('title', '')}. Summary: {article.get('summary', '')}"
+                        unique_article_id = f"news_{news_ticker or 'general'}_{i}"
+                        chunks = text_processor.chunk_text(article_text, "news", unique_article_id)
+                        news_chunks.extend(chunks)
+                    
+                    if vector_store.add_documents(news_chunks, "news"):
+                        st.success(f"✅ Stored {len(news_chunks)} news chunks for {len(news_articles)} articles.")
+                    else:
+                        st.error("Failed to store news articles")
+                else:
+                    st.warning("No news articles found.")
 
     # Tab 2: Query & Analysis
     with tab2:
