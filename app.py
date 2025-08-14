@@ -784,7 +784,7 @@ def main():
             # Model information
             st.markdown("**Model Configuration**")
             st.write(f"Embedding Model: all-MiniLM-L6-v2")
-            st.write(f"LLM Model: gemini-pro")
+            st.write(f"LLM Model: gemini-1.5-flash")
             st.write(f"Vector Database: ChromaDB")
 
         with col2:
